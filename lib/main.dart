@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(const MyApp());
 }
-// work
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -31,39 +31,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  String imageSource = "images/question-mark.png";
-  late TextEditingController _controllerLogin;
-  late TextEditingController _controllerPassword;
+  var _counter = 0.0;
+  var myFontSize = 30.0;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controllerLogin = TextEditingController();
-    _controllerPassword = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controllerLogin.dispose();
-    _controllerPassword.dispose();
-    super.dispose();
-  }
-
-  void loginBtnPressed() {
-    String userPsw = _controllerPassword.value.text;
-    setState(() {
-      if(userPsw == "QWERTY123") {
-        imageSource = "images/idea.png";
-      } else {
-        imageSource = "images/stop.png";
-      }
+      myFontSize++;
     });
   }
 
@@ -78,26 +52,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextField(controller: _controllerLogin,
-                decoration: const InputDecoration(
-                    hintText:"Username/Email",
-                    border: OutlineInputBorder(),
-                    labelText: "Login"
-                )),
-            const SizedBox(height: 10),
-            TextField(controller: _controllerPassword,
-                obscureText: true,
-                decoration: const InputDecoration(
-                    hintText:"Type here!",
-                    border: OutlineInputBorder(),
-                    labelText: "Password"
-                )),
-            const SizedBox(height: 10),
-            ElevatedButton(onPressed: loginBtnPressed, child: const Text('Login')),
-            Image.asset(imageSource, width: 300, height: 300),
+            Text(
+              'You have pushed the button this many times:',
+              style: TextStyle(fontSize: myFontSize),
+            ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: TextStyle(fontSize: myFontSize),
             ),
           ],
         ),
