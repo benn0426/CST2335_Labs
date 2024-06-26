@@ -14,7 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Lab5',
+      initialRoute: '/home',
+      routes: {
+        '/home': (context) { return const MyHomePage(title: 'Flutter Lab5',); },
+        '/second': (context) { return const MyLoginPage(title: 'Flutter Lab5',); },
+      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -37,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String imageSource = "images/question-mark.png";
   late TextEditingController _controllerLogin;
   late TextEditingController _controllerPassword;
-  late EncryptedSharedPreferences storedData;
+  static String userLogin = "";
 
 
   @override
@@ -45,26 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _controllerLogin = TextEditingController();
     _controllerPassword = TextEditingController();
-
-    storedData = EncryptedSharedPreferences();
-    storedData.getString("userName").then( (savedUserName) {
-      if(savedUserName.isNotEmpty) {
-        _controllerLogin.text = savedUserName;
-      }
-    });
-    storedData.getString("userPsw").then( (savedUserPsw) {
-      if(savedUserPsw.isNotEmpty) {
-        _controllerPassword.text = savedUserPsw;
-        var snackBar = const SnackBar(
-          content: Text('Data successfully loaded'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    });
-
   }
-
-
   @override
   void dispose() {
     _controllerLogin.dispose();
@@ -72,29 +58,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+
   void loginBtnPressed() {
-    String userName = _controllerLogin.value.text;
     String userPsw = _controllerPassword.value.text;
+    userLogin = _controllerLogin.value.text;
+    Navigator.pushNamed(context, "/second");
     setState(() {
       if(userPsw == "QWERTY123") {
         imageSource = "images/idea.png";
-        showDialog<String>(
-            context: context,
-            builder: (BuildContext context) =>
-            AlertDialog(
-                title: const Text('Save Info'),
-                content: const Text('Would you like to save your information for nex time'),
-                actions: <Widget>[
-                  ElevatedButton(child: const Text('ok'), onPressed: () async {
-                    final storedData = EncryptedSharedPreferences();
-                    storedData.setString("userName", userName);
-                    storedData.setString("userPsw", userPsw);
-                    Navigator.pop(context);
-                  },),
-                  FilledButton(child: const Text('cancel'), onPressed: (){Navigator.pop(context);},),
-                ]
-            )
-        );
       } else {
         imageSource = "images/stop.png";
       }
@@ -131,7 +102,144 @@ class _MyHomePageState extends State<MyHomePage> {
             Image.asset(imageSource, width: 300, height: 300),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+
+
+// Second page
+
+
+
+class MyLoginPage extends StatefulWidget {
+  const MyLoginPage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyLoginPage> createState() => _MyLoginPageState();
+}
+
+class _MyLoginPageState extends State<MyLoginPage> {
+  late TextEditingController _controllerFirstName;
+  late TextEditingController _controllerLastName;
+  late TextEditingController _controllerPhone;
+  late TextEditingController _controllerEmail;
+  late EncryptedSharedPreferences storedData;
+
+  void loadData() {
+    // var snackBar = SnackBar( content: Text('Welcome back: $_MyHomePageState.userLogin'), );
+    // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    // storedData = EncryptedSharedPreferences();
+    // storedData.getString("userName").then( (savedUserName) {
+    //   if(savedUserName.isNotEmpty) {
+    //     _controllerLogin.text = savedUserName;
+    //   }
+    // });
+    // storedData.getString("userPsw").then( (savedUserPsw) {
+    //   if(savedUserPsw.isNotEmpty) {
+    //     _controllerPassword.text = savedUserPsw;
+    //   }
+    // });
+  }
+  void saveData() {
+    // final storedData = EncryptedSharedPreferences();
+    // storedData.setString("userName", userName);
+    // storedData.setString("userPsw", userPsw);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controllerFirstName = TextEditingController();
+    _controllerLastName = TextEditingController();
+    _controllerPhone = TextEditingController();
+    _controllerEmail = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Welcome back: ${_MyHomePageState.userLogin}')),
+      );
+    });
+
+    loadData();
+  }
+  @override
+  void dispose() {
+    _controllerFirstName.dispose();
+    _controllerLastName.dispose();
+    _controllerPhone.dispose();
+    _controllerEmail.dispose();
+
+    saveData();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(controller: _controllerFirstName,
+                decoration: const InputDecoration(
+                    hintText:"First name...",
+                    border: OutlineInputBorder(),
+                    labelText: "First Name"
+                )),
+            const SizedBox(height: 10),
+            TextField(controller: _controllerLastName,
+                obscureText: true,
+                decoration: const InputDecoration(
+                    hintText:"Last name...",
+                    border: OutlineInputBorder(),
+                    labelText: "Last Name"
+                )),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget> [
+                Flexible (child:
+                TextField(controller: _controllerPhone,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        hintText:"Phone number...",
+                        border: OutlineInputBorder(),
+                        labelText: "Phone Number"
+                    )),),
+                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
+                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget> [
+                Flexible (child:
+                TextField(controller: _controllerEmail,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        hintText:"Email address...",
+                        border: OutlineInputBorder(),
+                        labelText: "Email Address"
+                    )),),
+                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
+              ],
+            ),
+          ],
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void testFunction() {
   }
 }
