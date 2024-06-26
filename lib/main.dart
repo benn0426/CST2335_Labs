@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 
 void main() {
@@ -62,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void loginBtnPressed() {
     String userPsw = _controllerPassword.value.text;
     userLogin = _controllerLogin.value.text;
-    Navigator.pushNamed(context, "/second");
     setState(() {
       if(userPsw == "QWERTY123") {
         imageSource = "images/idea.png";
+        Navigator.pushNamed(context, "/second");
       } else {
         imageSource = "images/stop.png";
       }
@@ -131,25 +131,35 @@ class _MyLoginPageState extends State<MyLoginPage> {
   late EncryptedSharedPreferences storedData;
 
   void loadData() {
-    // var snackBar = SnackBar( content: Text('Welcome back: $_MyHomePageState.userLogin'), );
-    // ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-    // storedData = EncryptedSharedPreferences();
-    // storedData.getString("userName").then( (savedUserName) {
-    //   if(savedUserName.isNotEmpty) {
-    //     _controllerLogin.text = savedUserName;
-    //   }
-    // });
-    // storedData.getString("userPsw").then( (savedUserPsw) {
-    //   if(savedUserPsw.isNotEmpty) {
-    //     _controllerPassword.text = savedUserPsw;
-    //   }
-    // });
+    storedData = EncryptedSharedPreferences();
+    storedData.getString("userFirstName").then( (savedFirstName) {
+      if(savedFirstName.isNotEmpty) {
+        _controllerFirstName.text = savedFirstName;
+      }
+    });
+    storedData.getString("userLastName").then( (savedLastName) {
+      if(savedLastName.isNotEmpty) {
+        _controllerLastName.text = savedLastName;
+      }
+    });
+    storedData.getString("userPhone").then( (savedPhone) {
+      if(savedPhone.isNotEmpty) {
+        _controllerPhone.text = savedPhone;
+      }
+    });
+    storedData.getString("userEmail").then( (savedEmail) {
+      if(savedEmail.isNotEmpty) {
+        _controllerEmail.text = savedEmail;
+      }
+    });
   }
   void saveData() {
-    // final storedData = EncryptedSharedPreferences();
-    // storedData.setString("userName", userName);
-    // storedData.setString("userPsw", userPsw);
+    final storedData = EncryptedSharedPreferences();
+    storedData.setString("userFirstName", _controllerFirstName.value.text);
+    storedData.setString("userLastName", _controllerLastName.value.text);
+    storedData.setString("userPhone", _controllerPhone.value.text);
+    storedData.setString("userEmail", _controllerEmail.value.text);
   }
 
   @override
@@ -159,23 +169,62 @@ class _MyLoginPageState extends State<MyLoginPage> {
     _controllerLastName = TextEditingController();
     _controllerPhone = TextEditingController();
     _controllerEmail = TextEditingController();
+
+    loadData();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Welcome back: ${_MyHomePageState.userLogin}')),
       );
     });
-
-    loadData();
   }
   @override
   void dispose() {
+    saveData();
+
     _controllerFirstName.dispose();
     _controllerLastName.dispose();
     _controllerPhone.dispose();
     _controllerEmail.dispose();
 
-    saveData();
     super.dispose();
+  }
+
+  void launchCall() {
+    launchUrlString('tel:${_controllerPhone.value.text}');
+    // canLaunchUrlString('tel:${_controllerPhone.value.text}').then((itCan) {
+    //   if (itCan) {
+    //     launchUrlString('tel:${_controllerPhone.value.text}');
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text("You can't make phone calls from this device"),),
+    //     );
+    //   }
+    // });
+  }
+  void launchSMS() {
+    launchUrlString('sms:${_controllerPhone.value.text}');
+    // canLaunchUrlString('sms:${_controllerPhone.value.text}').then((itCan) {
+    //   if (itCan) {
+    //     launchUrlString('sms:${_controllerPhone.value.text}');
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text("You can't send messages from this device"),),
+    //     );
+    //   }
+    // });
+  }
+  void launchEmail() {
+    launchUrlString('mailto:${_controllerEmail.value.text}');
+    // canLaunchUrlString('mailto:${_controllerEmail.value.text}').then((itCan) {
+    //   if (itCan) {
+    //     launchUrlString('mailto:${_controllerEmail.value.text}');
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text("You can't mail from this device"),),
+    //     );
+    //   }
+    // });
   }
 
   @override
@@ -197,7 +246,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
                 )),
             const SizedBox(height: 10),
             TextField(controller: _controllerLastName,
-                obscureText: true,
                 decoration: const InputDecoration(
                     hintText:"Last name...",
                     border: OutlineInputBorder(),
@@ -209,14 +257,13 @@ class _MyLoginPageState extends State<MyLoginPage> {
               children: <Widget> [
                 Flexible (child:
                 TextField(controller: _controllerPhone,
-                    obscureText: true,
                     decoration: const InputDecoration(
                         hintText:"Phone number...",
                         border: OutlineInputBorder(),
                         labelText: "Phone Number"
                     )),),
-                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
-                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
+                ElevatedButton(onPressed: launchCall, child: const Icon(Icons.phone)),
+                ElevatedButton(onPressed: launchSMS, child: const Icon(Icons.sms)),
               ],
             ),
             const SizedBox(height: 10),
@@ -225,21 +272,18 @@ class _MyLoginPageState extends State<MyLoginPage> {
               children: <Widget> [
                 Flexible (child:
                 TextField(controller: _controllerEmail,
-                    obscureText: true,
                     decoration: const InputDecoration(
                         hintText:"Email address...",
                         border: OutlineInputBorder(),
                         labelText: "Email Address"
                     )),),
-                ElevatedButton(onPressed: testFunction, child: const Text('Login')),
+                ElevatedButton(onPressed: launchEmail, child: const Icon(Icons.mail)),
               ],
             ),
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 
-  void testFunction() {
-  }
 }
